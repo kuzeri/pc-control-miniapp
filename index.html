@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+  <title>PC Control</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:       var(--tg-theme-bg-color,           #1c1c1e);
+      --bg2:      var(--tg-theme-secondary-bg-color,  #2c2c2e);
+      --text:     var(--tg-theme-text-color,           #ffffff);
+      --hint:     var(--tg-theme-hint-color,           #8e8e93);
+      --accent:   var(--tg-theme-button-color,         #2481cc);
+      --btn-text: var(--tg-theme-button-text-color,    #ffffff);
+      --red:   #ff3b30;
+      --orange:#ff9500;
+      --green: #34c759;
+      --blue:  #007aff;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      padding: 16px;
+      min-height: 100vh;
+      user-select: none;
+    }
+
+    h2 {
+      font-size: 13px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--hint);
+      margin: 20px 0 10px;
+    }
+    h2:first-child { margin-top: 0; }
+
+    /* ── Action grid ─────────────────────────────── */
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .btn {
+      background: var(--bg2);
+      color: var(--text);
+      border: none;
+      border-radius: 14px;
+      padding: 18px 12px;
+      font-size: 15px;
+      font-weight: 500;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      transition: transform 0.1s, opacity 0.1s;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .btn:active { transform: scale(0.94); opacity: 0.8; }
+    .btn .icon  { font-size: 30px; line-height: 1; }
+    .btn .label { font-size: 13px; }
+
+    .btn.red    { background: var(--red);    color: #fff; }
+    .btn.orange { background: var(--orange); color: #fff; }
+    .btn.green  { background: var(--green);  color: #fff; }
+    .btn.blue    { background: var(--blue);   color: #fff; }
+    .btn.spotify { background: #1db954;       color: #fff; }
+
+    /* ── Run section ─────────────────────────────── */
+    .card {
+      background: var(--bg2);
+      border-radius: 14px;
+      padding: 14px;
+    }
+
+    .input {
+      width: 100%;
+      background: var(--bg);
+      color: var(--text);
+      border: 1.5px solid rgba(255,255,255,0.08);
+      border-radius: 10px;
+      padding: 10px 12px;
+      font-size: 14px;
+      font-family: 'Menlo', 'Courier New', monospace;
+      outline: none;
+      margin-bottom: 10px;
+    }
+    .input:focus { border-color: var(--accent); }
+    .input::placeholder { color: var(--hint); }
+
+    .run-btn {
+      width: 100%;
+      background: var(--accent);
+      color: var(--btn-text);
+      border: none;
+      border-radius: 10px;
+      padding: 12px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.1s;
+    }
+    .run-btn:active { opacity: 0.75; }
+
+    /* ── Toast ───────────────────────────────────── */
+    #toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(60px);
+      background: rgba(0,0,0,0.75);
+      color: #fff;
+      padding: 10px 20px;
+      border-radius: 20px;
+      font-size: 14px;
+      transition: transform 0.25s ease, opacity 0.25s ease;
+      opacity: 0;
+      pointer-events: none;
+      backdrop-filter: blur(8px);
+      white-space: nowrap;
+    }
+    #toast.show {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>Основные действия</h2>
+  <div class="grid">
+    <button class="btn blue"   onclick="send('screenshot')">
+      <span class="icon">📸</span><span class="label">Скриншот</span>
+    </button>
+    <button class="btn green"  onclick="send('status')">
+      <span class="icon">💻</span><span class="label">Статус</span>
+    </button>
+    <button class="btn orange" onclick="confirm('restart')">
+      <span class="icon">🔄</span><span class="label">Перезагрузка</span>
+    </button>
+    <button class="btn red"    onclick="confirm('shutdown')">
+      <span class="icon">⏻</span><span class="label">Выключить</span>
+    </button>
+  </div>
+
+  <h2>Системная информация</h2>
+  <div class="grid">
+    <button class="btn" onclick="send('cpu')">
+      <span class="icon">🔥</span><span class="label">Нагрузка CPU</span>
+    </button>
+    <button class="btn" onclick="send('memory')">
+      <span class="icon">🧠</span><span class="label">Память</span>
+    </button>
+    <button class="btn" onclick="send('disk')">
+      <span class="icon">💾</span><span class="label">Диск</span>
+    </button>
+    <button class="btn" onclick="send('network')">
+      <span class="icon">🌐</span><span class="label">Сеть</span>
+    </button>
+    <button class="btn" onclick="send('processes')">
+      <span class="icon">📋</span><span class="label">Процессы</span>
+    </button>
+    <button class="btn" onclick="send('uptime')">
+      <span class="icon">⏱</span><span class="label">Аптайм</span>
+    </button>
+  </div>
+
+  <h2>Медиа</h2>
+  <div class="grid">
+    <button class="btn spotify" onclick="send('spotify')">
+      <span class="icon">🎵</span><span class="label">Моя музыка</span>
+    </button>
+    <button class="btn" onclick="send('mute')">
+      <span class="icon">🔇</span><span class="label">Без звука</span>
+    </button>
+    <button class="btn" onclick="send('volume_up')">
+      <span class="icon">🔊</span><span class="label">Громче</span>
+    </button>
+    <button class="btn" onclick="send('volume_down')">
+      <span class="icon">🔈</span><span class="label">Тише</span>
+    </button>
+    <button class="btn" onclick="send('lock')">
+      <span class="icon">🔒</span><span class="label">Блокировка</span>
+    </button>
+  </div>
+
+  <h2>Выполнить команду</h2>
+  <div class="card">
+    <input class="input" id="cmd" type="text" placeholder="Get-Process | Sort CPU -Desc | Select -First 5" autocomplete="off" />
+    <button class="run-btn" onclick="sendRun()">▶ Выполнить в PowerShell</button>
+  </div>
+
+  <div id="toast"></div>
+
+  <script>
+    const tg = window.Telegram.WebApp;
+    tg.ready();
+    tg.expand();
+
+    function send(action) {
+      tg.sendData(JSON.stringify({ action }));
+      toast('Команда отправлена...');
+    }
+
+    function confirm(action) {
+      const labels = { shutdown: 'Выключить ПК?', restart: 'Перезагрузить ПК?' };
+      tg.showConfirm(labels[action] || 'Выполнить?', (ok) => { if (ok) send(action); });
+    }
+
+    function sendRun() {
+      const cmd = document.getElementById('cmd').value.trim();
+      if (!cmd) { toast('Введите команду'); return; }
+      tg.sendData(JSON.stringify({ action: 'run', cmd }));
+      toast('Выполняю...');
+    }
+
+    let toastTimer;
+    function toast(msg) {
+      const el = document.getElementById('toast');
+      el.textContent = msg;
+      el.classList.add('show');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => el.classList.remove('show'), 2000);
+    }
+
+    // Send on Enter
+    document.getElementById('cmd').addEventListener('keydown', e => {
+      if (e.key === 'Enter') sendRun();
+    });
+  </script>
+</body>
+</html>
