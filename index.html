@@ -73,6 +73,56 @@
     .btn.blue    { background: var(--blue);   color: #fff; }
     .btn.spotify { background: #1db954;       color: #fff; }
 
+    /* ── Player ──────────────────────────────────── */
+    .player {
+      background: var(--bg2);
+      border-radius: 14px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .player-row {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 12px;
+    }
+    .pbtn {
+      background: rgba(255,255,255,0.08);
+      border: none;
+      border-radius: 50%;
+      color: var(--text);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.1s, background 0.1s;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .pbtn:active { transform: scale(0.88); background: rgba(255,255,255,0.16); }
+    .pbtn.sm { width: 52px; height: 52px; font-size: 22px; }
+    .pbtn.lg { width: 68px; height: 68px; font-size: 32px; background: var(--accent); }
+    .pbtn.lg:active { background: var(--accent); opacity: 0.8; }
+    .player-vol {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+    }
+    .vbtn {
+      flex: 1;
+      background: rgba(255,255,255,0.06);
+      border: none;
+      border-radius: 10px;
+      color: var(--text);
+      font-size: 20px;
+      padding: 10px;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+      transition: background 0.1s;
+    }
+    .vbtn:active { background: rgba(255,255,255,0.14); }
+
     /* ── Run section ─────────────────────────────── */
     .card {
       background: var(--bg2);
@@ -172,19 +222,25 @@
     </button>
   </div>
 
+  <h2>Плеер</h2>
+  <div class="player">
+    <div class="player-row">
+      <button class="pbtn sm" onclick="send('prev_track')" title="Предыдущий">⏮</button>
+      <button class="pbtn lg" onclick="send('play_pause')" title="Играть / Пауза">⏯</button>
+      <button class="pbtn sm" onclick="send('next_track')" title="Следующий">⏭</button>
+    </div>
+    <div class="player-vol">
+      <button class="vbtn" onclick="send('volume_down')">🔈</button>
+      <button class="vbtn" onclick="send('mute')">🔇</button>
+      <button class="vbtn" onclick="send('stop_media')">⏹</button>
+      <button class="vbtn" onclick="send('volume_up')">🔊</button>
+    </div>
+  </div>
+
   <h2>Медиа</h2>
   <div class="grid">
     <button class="btn spotify" onclick="send('spotify')">
       <span class="icon">🎵</span><span class="label">Моя музыка</span>
-    </button>
-    <button class="btn" onclick="send('mute')">
-      <span class="icon">🔇</span><span class="label">Без звука</span>
-    </button>
-    <button class="btn" onclick="send('volume_up')">
-      <span class="icon">🔊</span><span class="label">Громче</span>
-    </button>
-    <button class="btn" onclick="send('volume_down')">
-      <span class="icon">🔈</span><span class="label">Тише</span>
     </button>
     <button class="btn" onclick="send('lock')">
       <span class="icon">🔒</span><span class="label">Блокировка</span>
