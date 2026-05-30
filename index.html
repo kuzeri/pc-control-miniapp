@@ -205,12 +205,18 @@
     tg.expand();
 
     function send(action) {
-      try {
-        tg.sendData(JSON.stringify({ action }));
-        toast('Команда отправлена...');
-      } catch (e) {
-        tg.showAlert('Ошибка: ' + e.message + '\nPlatform: ' + tg.platform + '\nVersion: ' + tg.version + '\ninitData: ' + (tg.initData ? 'есть' : 'пусто'));
-      }
+      tg.sendData(JSON.stringify({ action }));
+      // If sendData worked, the app closes immediately.
+      // If it's still open after 600ms — wrong launch context (menu button).
+      setTimeout(() => {
+        tg.showAlert(
+          '⚠️ Не работает!\n\n' +
+          'Закройте это окно и откройте панель через кнопку в чате:\n\n' +
+          '1. Напишите боту /menu\n' +
+          '2. Нажмите большую кнопку "🖥 Панель управления" над клавиатурой\n\n' +
+          '(Не через меню бота — только через кнопку в чате)'
+        );
+      }, 600);
     }
 
     function confirm(action) {
