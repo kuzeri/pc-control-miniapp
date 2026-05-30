@@ -205,8 +205,12 @@
     tg.expand();
 
     function send(action) {
-      tg.sendData(JSON.stringify({ action }));
-      toast('Команда отправлена...');
+      try {
+        tg.sendData(JSON.stringify({ action }));
+        toast('Команда отправлена...');
+      } catch (e) {
+        tg.showAlert('Ошибка: ' + e.message + '\nPlatform: ' + tg.platform + '\nVersion: ' + tg.version + '\ninitData: ' + (tg.initData ? 'есть' : 'пусто'));
+      }
     }
 
     function confirm(action) {
@@ -217,8 +221,12 @@
     function sendRun() {
       const cmd = document.getElementById('cmd').value.trim();
       if (!cmd) { toast('Введите команду'); return; }
-      tg.sendData(JSON.stringify({ action: 'run', cmd }));
-      toast('Выполняю...');
+      try {
+        tg.sendData(JSON.stringify({ action: 'run', cmd }));
+        toast('Выполняю...');
+      } catch (e) {
+        tg.showAlert('Ошибка: ' + e.message);
+      }
     }
 
     let toastTimer;
